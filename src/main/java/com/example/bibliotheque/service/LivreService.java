@@ -3,7 +3,9 @@ package com.example.bibliotheque.service;
 import com.example.bibliotheque.model.Livre; 
 import com.example.bibliotheque.repository.LivreRepository; 
 import org.springframework.beans.factory.annotation.Autowired; 
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service; 
+import org.springframework.data.domain.PageRequest;
  
 import java.util.List; 
  
@@ -38,5 +40,21 @@ public class LivreService {
         } 
         return null; 
     } 
+
+    @Transactional
+    public void updateLivreAuthor(Long id, String newAuthor) {
+        Livre livre = livreRepository.findById(id).orElseThrow();
+        livre.setAuteur(newAuthor);
+    }
+
+    public List<Livre> searchLivres(String auteur, int annee, int page) {
+        PageRequest pageRequest = PageRequest.of(page, 10); // 10 items per page
+        return livreRepository.findByAuteurAndAfterYear(auteur, annee, pageRequest);
+    }
+
+    public List<Livre> searchLivres(String keyword, int page) {
+        PageRequest pageRequest = PageRequest.of(page - 1, 10); // Convert to 0-based indexing, 10 items per page
+        return livreRepository.searchByTitle(keyword, pageRequest);
+    }
 
 }
